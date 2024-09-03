@@ -20,8 +20,8 @@ The program relies on the following IMDB tab separated files:
 
     usage: imdb-sqlite [OPTIONS]
     
-    Imports imdb tsv interface files into a new sqlitedatabase. Fetches them from
-    imdb if not present onthe machine.
+    Imports imdb tsv interface files into a new sqlite database. Fetches them from
+    imdb if not present on the machine.
     
     optional arguments:
       -h, --help       show this help message and exit
@@ -127,7 +127,7 @@ the following:
 ```sql
 -- // table aliases: st = show-title, et = episode-title
 SELECT st.primary_title, st.premiered, st.genres, e.season_number,
-       e.eposide_number, et.primary_title, r.rating, r.votes
+       e.episode_number, et.primary_title, r.rating, r.votes
 FROM  titles AS st
 INNER JOIN       episodes  e ON ( e.show_title_id = st.title_id )
 INNER JOIN       titles   et ON ( e.episode_title_id = et.title_id )
@@ -137,7 +137,7 @@ AND   st.type = 'tvSeries'
 ORDER BY r.rating DESC
 ```
 
-**Find which productions both Robert Deniro and Al Pacino acted together on**
+**Find which productions both Robert De Niro and Al Pacino acted together on**
 ```sql
 SELECT t.title_id, t.type, t.primary_title, t.premiered, t.genres,
        c1.characters AS 'Pacino played', c2.characters AS 'Deniro played'
