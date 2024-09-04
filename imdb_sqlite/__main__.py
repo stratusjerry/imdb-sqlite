@@ -289,17 +289,17 @@ def import_file(db, filename, table, column_mapping):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Imports imdb tsv interface files into a new sqlite'
-                    'database. Fetches them from imdb if not present on'
-                    'the machine.'
+        description='''Imports imdb tsv interface files into a new sqlite
+                       database. Fetches them from imdb if not present on
+                       the machine.'''
     )
     parser.add_argument('--db', metavar='FILE', default='imdb.db',
                         help='Connection URI for the database to import into')
     parser.add_argument('--cache-dir', metavar='DIR', default='downloads',
                         help='Download cache dir where the tsv files from imdb will be stored before the import')
     parser.add_argument('--no-index', action='store_true',
-                        help='Do not create any indices. Massively slower joins, but cuts the DB file size '
-                             'approximately in half')
+                        help='''Do not create any indices. Massively slower joins, but cuts the DB file size
+                                approximately in half''')
     parser.add_argument('--verbose', action='store_true',
                         help='Show database interaction')
     opts = parser.parse_args()
