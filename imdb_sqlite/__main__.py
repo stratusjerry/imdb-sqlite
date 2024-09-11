@@ -104,6 +104,12 @@ TSV_TABLE_MAP = OrderedDict([
             ('averageRating',     Column(name='rating', type='REAL')),
             ('numVotes',          Column(name='votes', type='INTEGER')),
         ]))),
+    ('title.crew.tsv.gz',
+        ('production', OrderedDict([
+            ('tconst',            Column(name='title_id', type='VARCHAR PRIMARY KEY')),
+            ('directors',         Column(name='directors')),
+            ('writers',           Column(name='writers')),
+        ]))),
 ])
 
 
