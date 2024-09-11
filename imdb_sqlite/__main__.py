@@ -339,7 +339,7 @@ def main():
     if opts.backup_db:
         logger.info('Backing up to DB: {}'.format(opts.backup_db))
         backup_db = sqlite3.connect(opts.backup_db)
-        db.backup(backup_db)
+        db.connection.backup(backup_db)
         backup_db.close()
 
     db.close()
