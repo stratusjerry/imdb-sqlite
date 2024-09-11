@@ -308,6 +308,8 @@ def main():
     )
     parser.add_argument('--db', metavar='FILE', default='imdb.db',
                         help='Connection URI for the database to import into')
+    parser.add_argument('--backup-db', metavar='FILE',
+                        help='Database to backup to. Useful if using in memory database for transactions')
     parser.add_argument('--cache-dir', metavar='DIR', default='downloads',
                         help='Download cache dir where the tsv files from imdb will be stored before the import')
     parser.add_argument('--no-index', action='store_true',
@@ -345,6 +347,12 @@ def main():
 
     logger.info('Analyzing DB to generate statistic for query planner ...')
     db.analyze()
+
+    if opts.backup_db:
+        logger.info('Backing up to DB: {}'.format(opts.backup_db))
+        backup_db = sqlite3.connect(opts.backup_db)
+        db.connection.backup(backup_db)
+        backup_db.close()
 
     db.close()
     logger.info('Import successful')
