@@ -20,10 +20,15 @@ setuptools.setup(
     install_requires=[
         'tqdm>=4.4.1',
     ],
-    classifiers=(
-        'Programming Language :: Python :: 2.7',
+    python_requires='>=3.8',
+    classifiers=[
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Operating System :: OS Independent',
-    ),
+    ],
 )

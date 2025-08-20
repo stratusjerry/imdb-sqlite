@@ -1,2 +1,13 @@
+# Development dependencies - use pyproject.toml instead
+# This file is kept for backward compatibility only
+# 
+# To install development dependencies with uv:
+#   uv pip install -e ".[dev]"
+#
+# Or with pip:
+#   pip install -e ".[dev]"
+
 tqdm>=4.4.1
-flake8
+ruff>=0.8.0
+twine>=5.0.0
+build>=1.0.0

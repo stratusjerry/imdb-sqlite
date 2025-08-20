@@ -1,3 +1,63 @@
 [build-system]
 requires = ["setuptools>=40.8.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "imdb-sqlite"
+version = "2.0.0"
+description = "Imports IMDB TSV files into a SQLite database"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "GNU GPL v2"}
+authors = [
+    {name = "Jonas Tingeborn", email = "tinjon+pip@gmail.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "tqdm>=4.4.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+    "twine>=5.0.0",
+    "build>=1.0.0",
+]
+
+[project.scripts]
+imdb-sqlite = "imdb_sqlite.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/jojje/imdb-sqlite"
+Repository = "https://github.com/jojje/imdb-sqlite"
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"           # Enforce double quotes
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

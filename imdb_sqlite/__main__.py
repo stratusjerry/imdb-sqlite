@@ -25,20 +25,17 @@ import sqlite3
 import sys
 from collections import OrderedDict
 from contextlib import contextmanager
+from urllib.request import urlopen
 
 from tqdm import tqdm
 
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
-
-logger = logging.getLogger('imdbimporter')
+logger = logging.getLogger("imdbimporter")
 
 
 class Column:
     """Table column configuration"""
-    def __init__(self, name, type='VARCHAR', pk=None, index=None, unique=None, null=True):
+
+    def __init__(self, name, type="VARCHAR", pk=None, index=None, unique=None, null=True):
         self.name = name
         self.type = type
         self.pk = pk
@@ -52,64 +49,111 @@ class Column:
 # https://www.imdb.com/interfaces/
 
 # <filename>: ( <table-name>, {<tsv-header>: column} )
-TSV_TABLE_MAP = OrderedDict([
-    ('name.basics.tsv.gz',
-        ('people', OrderedDict([
-            ('nconst',            Column(name='person_id', type='VARCHAR PRIMARY KEY', index=True)),
-            ('primaryName',       Column(name='name', index=True)),
-            ('birthYear',         Column(name='born', type='INTEGER')),
-            ('deathYear',         Column(name='died', type='INTEGER')),
-        ]))),
-    ('title.basics.tsv.gz',
-        ('titles', OrderedDict([
-            ('tconst',            Column(name='title_id', type='VARCHAR PRIMARY KEY')),
-            ('titleType',         Column(name='type', index=True)),
-            ('primaryTitle',      Column(name='primary_title', index=True)),
-            ('originalTitle',     Column(name='original_title', index=True)),
-            ('isAdult',           Column(name='is_adult', type='INTEGER')),
-            ('startYear',         Column(name='premiered', type='INTEGER')),
-            ('endYear',           Column(name='ended', type='INTEGER')),
-            ('runtimeMinutes',    Column(name='runtime_minutes', type='INTEGER')),
-            ('genres',            Column(name='genres')),
-        ]))),
-    ('title.akas.tsv.gz',
-        ('akas', OrderedDict([
-            ('titleId',           Column(name='title_id', index=True)),
-            ('title',             Column(name='title', index=True)),
-            ('region',            Column(name='region')),
-            ('language',          Column(name='language')),
-            ('types',             Column(name='types')),
-            ('attributes',        Column(name='attributes')),
-            ('isOriginalTitle',   Column(name='is_original_title', type='INTEGER')),
-        ]))),
-    ('title.principals.tsv.gz',
-        ('crew', OrderedDict([
-            ('tconst',            Column(name='title_id', index=True)),
-            ('nconst',            Column(name='person_id', index=True)),
-            ('category',          Column(name='category', index=True)),
-            ('job',               Column(name='job')),
-            ('characters',        Column(name='characters')),
-        ]))),
-    ('title.episode.tsv.gz',
-        ('episodes', OrderedDict([
-            ('tconst',            Column(name='episode_title_id', index=True)),
-            ('parentTconst',      Column(name='show_title_id', index=True)),
-            ('seasonNumber',      Column(name='season_number', type='INTEGER')),
-            ('episodeNumber',     Column(name='episode_number', type='INTEGER')),
-        ]))),
-    ('title.ratings.tsv.gz',
-        ('ratings', OrderedDict([
-            ('tconst',            Column(name='title_id', type='VARCHAR PRIMARY KEY')),
-            ('averageRating',     Column(name='rating', type='REAL')),
-            ('numVotes',          Column(name='votes', type='INTEGER')),
-        ]))),
-])
+TSV_TABLE_MAP = OrderedDict(
+    [
+        (
+            "name.basics.tsv.gz",
+            (
+                "people",
+                OrderedDict(
+                    [
+                        (
+                            "nconst",
+                            Column(name="person_id", type="VARCHAR PRIMARY KEY", index=True),
+                        ),
+                        ("primaryName", Column(name="name", index=True)),
+                        ("birthYear", Column(name="born", type="INTEGER")),
+                        ("deathYear", Column(name="died", type="INTEGER")),
+                    ]
+                ),
+            ),
+        ),
+        (
+            "title.basics.tsv.gz",
+            (
+                "titles",
+                OrderedDict(
+                    [
+                        ("tconst", Column(name="title_id", type="VARCHAR PRIMARY KEY")),
+                        ("titleType", Column(name="type", index=True)),
+                        ("primaryTitle", Column(name="primary_title", index=True)),
+                        ("originalTitle", Column(name="original_title", index=True)),
+                        ("isAdult", Column(name="is_adult", type="INTEGER")),
+                        ("startYear", Column(name="premiered", type="INTEGER")),
+                        ("endYear", Column(name="ended", type="INTEGER")),
+                        ("runtimeMinutes", Column(name="runtime_minutes", type="INTEGER")),
+                        ("genres", Column(name="genres")),
+                    ]
+                ),
+            ),
+        ),
+        (
+            "title.akas.tsv.gz",
+            (
+                "akas",
+                OrderedDict(
+                    [
+                        ("titleId", Column(name="title_id", index=True)),
+                        ("title", Column(name="title", index=True)),
+                        ("region", Column(name="region")),
+                        ("language", Column(name="language")),
+                        ("types", Column(name="types")),
+                        ("attributes", Column(name="attributes")),
+                        ("isOriginalTitle", Column(name="is_original_title", type="INTEGER")),
+                    ]
+                ),
+            ),
+        ),
+        (
+            "title.principals.tsv.gz",
+            (
+                "crew",
+                OrderedDict(
+                    [
+                        ("tconst", Column(name="title_id", index=True)),
+                        ("nconst", Column(name="person_id", index=True)),
+                        ("category", Column(name="category", index=True)),
+                        ("job", Column(name="job")),
+                        ("characters", Column(name="characters")),
+                    ]
+                ),
+            ),
+        ),
+        (
+            "title.episode.tsv.gz",
+            (
+                "episodes",
+                OrderedDict(
+                    [
+                        ("tconst", Column(name="episode_title_id", index=True)),
+                        ("parentTconst", Column(name="show_title_id", index=True)),
+                        ("seasonNumber", Column(name="season_number", type="INTEGER")),
+                        ("episodeNumber", Column(name="episode_number", type="INTEGER")),
+                    ]
+                ),
+            ),
+        ),
+        (
+            "title.ratings.tsv.gz",
+            (
+                "ratings",
+                OrderedDict(
+                    [
+                        ("tconst", Column(name="title_id", type="VARCHAR PRIMARY KEY")),
+                        ("averageRating", Column(name="rating", type="REAL")),
+                        ("numVotes", Column(name="votes", type="INTEGER")),
+                    ]
+                ),
+            ),
+        ),
+    ]
+)
 
 
 class Database:
-    """ Shallow DB abstraction """
+    """Shallow DB abstraction"""
 
-    def __init__(self, table_map, uri=':memory:'):
+    def __init__(self, table_map, uri=":memory:"):
         self.table_map = table_map
         exists = os.path.exists(uri)
         self.connection = sqlite3.connect(uri, isolation_level=None)
@@ -120,7 +164,7 @@ class Database:
         """)
 
         if not exists:
-            logger.info('Applying schema')
+            logger.info("Applying schema")
             self.create_tables()
 
         # using a cursor is a smidgen faster, due to fewer function calls
@@ -128,18 +172,22 @@ class Database:
         self.debug_enabled = logger.isEnabledFor(logging.DEBUG)
 
     def create_tables(self):
-        sqls = [self._create_table_sql(table, mapping.values())
-                for table, mapping in self.table_map.values()]
-        sql = '\n'.join(sqls)
+        sqls = [
+            self._create_table_sql(table, mapping.values())
+            for table, mapping in self.table_map.values()
+        ]
+        sql = "\n".join(sqls)
         logger.debug(sql)
         self.connection.executescript(sql)
 
     def create_indices(self):
-        sqls = [self._create_index_sql(table, mapping.values())
-                for table, mapping in self.table_map.values()]
-        sql = '\n'.join([s for s in sqls if s])
+        sqls = [
+            self._create_index_sql(table, mapping.values())
+            for table, mapping in self.table_map.values()
+        ]
+        sql = "\n".join([s for s in sqls if s])
         logger.debug(sql)
-        for stmt in tqdm(sql.split('\n'), unit='index'):
+        for stmt in tqdm(sql.split("\n"), unit="index"):
             self.connection.executescript(stmt)
         self.commit()
 
@@ -147,11 +195,11 @@ class Database:
         self.connection.executescript("ANALYZE;")
 
     def begin(self):
-        logger.debug('TX BEGIN')
-        return self.cursor.execute('BEGIN')
+        logger.debug("TX BEGIN")
+        return self.cursor.execute("BEGIN")
 
     def commit(self):
-        logger.debug('TX COMMIT')
+        logger.debug("TX COMMIT")
         self.connection.commit()
 
     def rollback(self):
@@ -159,39 +207,43 @@ class Database:
 
     def execute(self, sql, values=None):
         if self.debug_enabled:
-            logger.debug('{sql} = {values}'.format(sql=sql, values=values))
+            logger.debug(f"{sql} = {values}")
 
         return self.cursor.execute(sql, values)
 
     def close(self):
-        logger.debug('DB CLOSE')
+        logger.debug("DB CLOSE")
         self.cursor.close()
         self.connection.close()
 
     @staticmethod
     def _create_table_sql(table_name, columns):
-        lines = ['CREATE TABLE %s (' % table_name]
+        lines = [f"CREATE TABLE {table_name} ("]
 
         # Declare columns
-        cols = ('  {name} {type}{pk}{unique}{null}'.format(
-                    name=c.name,
-                    type=c.type,
-                    pk=(' PRIMARY KEY' if c.pk else ''),
-                    unique=(' UNIQUE' if c.unique and not c.pk else ''),
-                    null=(' NOT NULL' if c.pk or not c.null else ''),
-                ) for c in columns)
-        lines.append(',\n'.join(cols))
-        lines.append(');')
+        cols = (
+            "  {name} {type}{pk}{unique}{null}".format(
+                name=c.name,
+                type=c.type,
+                pk=(" PRIMARY KEY" if c.pk else ""),
+                unique=(" UNIQUE" if c.unique and not c.pk else ""),
+                null=(" NOT NULL" if c.pk or not c.null else ""),
+            )
+            for c in columns
+        )
+        lines.append(",\n".join(cols))
+        lines.append(");")
 
-        return '\n'.join(lines) + '\n'
+        return "\n".join(lines) + "\n"
 
     @staticmethod
     def _create_index_sql(table_name, columns):
-        lines = ['CREATE INDEX ix_{table}_{col} ON {table} ({col});'
-                 .format(table=table_name, col=c.name)
-                 for c in columns
-                 if c.index]
-        return '\n'.join(lines)
+        lines = [
+            f"CREATE INDEX ix_{table_name}_{c.name} ON {table_name} ({c.name});"
+            for c in columns
+            if c.index
+        ]
+        return "\n".join(lines)
 
 
 def ensure_downloaded(files, cache_dir):
@@ -203,22 +255,23 @@ def ensure_downloaded(files, cache_dir):
         os.mkdir(cache_dir)
 
     for filename in files:
-        url = 'https://datasets.imdbws.com/{}'.format(filename)
+        url = f"https://datasets.imdbws.com/{filename}"
         ofn = os.path.join(cache_dir, filename)
 
         if os.path.exists(ofn):
             continue
 
-        logger.info('GET %s -> %s', url, ofn)
+        logger.info("GET %s -> %s", url, ofn)
         with urlopen(url) as response:
             if not response.status == 200:
-                raise RuntimeError('Failed to download "{url}". HTTP response code: '
-                                   '{code}'.format(url=url, code=response.status))
-            with open(ofn, 'wb') as f:
+                raise RuntimeError(
+                    f'Failed to download "{url}". HTTP response code: {response.status}'
+                )
+            with open(ofn, "wb") as f:
                 shutil.copyfileobj(response, f)
 
 
-def tsv(f, null='\\N'):
+def tsv(f, null="\\N"):
     """
     Read a Tab separated file and yield a dict for each "record".
     Similar to python's csv.DictReader but faster and handles imdb nulls.
@@ -231,7 +284,7 @@ def tsv(f, null='\\N'):
 
 def count_lines(f):
     """Count lines in a byte iterable"""
-    lf = "\n".encode()
+    lf = b"\n"
     chunk_size = 1 << 20
     lines = 0
     chunk = f.read(chunk_size)
@@ -245,40 +298,30 @@ def import_file(db, filename, table, column_mapping):
     """
     Import a imdb file into a given table, using a specific tsv value to column mapping
     """
-    fopen = gzip.open if filename.endswith('.gz') else open
+    fopen = gzip.open if filename.endswith(".gz") else open
 
     @contextmanager
-    def text_open(fn, encoding='utf-8'):
+    def text_open(fn, encoding="utf-8"):
         """Yields utf-8 decoded strings, one per line, from a [gzipped] text file"""
-        try:
-            # Fast python3 text decoding
-            with fopen(fn, 'rt', encoding=encoding) as tf:
-                yield tf
-        except TypeError:
-            # Fallback to slower python2 compatible variant
-            with fopen(filename, 'rb') as bf:
-                yield (b.decode('utf-8') for b in bf)
+        with fopen(fn, "rt", encoding=encoding) as tf:
+            yield tf
 
-    logger.info('Importing file: {}'.format(filename))
+    logger.info(f"Importing file: {filename}")
 
     headers = column_mapping.keys()
     columns = [c.name for c in column_mapping.values()]
-    placeholders = ['?' for _ in columns]
-    sql = 'INSERT INTO {table} ({columns}) VALUES({values})'.format(
-        table=table,
-        columns=', '.join(columns),
-        values=','.join(placeholders)
-    )
+    placeholders = ["?" for _ in columns]
+    sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES({','.join(placeholders)})"
 
-    logger.info('Reading number of rows ...')
-    with fopen(filename, 'rb') as f:
+    logger.info("Reading number of rows ...")
+    with fopen(filename, "rb") as f:
         total_rows = count_lines(f) - 1  # first line is header
 
-    logger.info('Inserting rows into table: {}'.format(table))
+    logger.info(f"Inserting rows into table: {table}")
     db.begin()
     try:
         with text_open(filename) as tf:
-            for row in tqdm(tsv(tf), total=total_rows, unit=' rows'):
+            for row in tqdm(tsv(tf), total=total_rows, unit=" rows"):
                 values = [row[h] for h in headers if h in row]
                 db.execute(sql, list(values))
         db.commit()
@@ -288,7 +331,8 @@ def import_file(db, filename, table, column_mapping):
 
 
 def filter_table_subset(table_map, wanted_tables):
-    def split_csv(s): return [v for v in (v.strip() for v in s.split(',')) if v]
+    def split_csv(s):
+        return [v for v in (v.strip() for v in s.split(",")) if v]
 
     wanted_tables = split_csv(wanted_tables)
     out = OrderedDict()
@@ -301,54 +345,66 @@ def filter_table_subset(table_map, wanted_tables):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Imports imdb tsv interface files into a new sqlite '
-                    'database. Fetches them from imdb if not present on '
-                    'the machine.'
+        description="Imports imdb tsv interface files into a new sqlite "
+        "database. Fetches them from imdb if not present on "
+        "the machine.",
     )
-    parser.add_argument('--db', metavar='FILE', default='imdb.db',
-                        help='Connection URI for the database to import into')
-    parser.add_argument('--cache-dir', metavar='DIR', default='downloads',
-                        help='Download cache dir where the tsv files from imdb will be stored before the import')
-    parser.add_argument('--no-index', action='store_true',
-                        help='Do not create any indices. Massively slower joins, but cuts the DB file size '
-                             'approximately in half')
-    parser.add_argument('--only', metavar='TABLES',
-                        help='Import only a some tables. The tables to import are specified using a comma delimited '
-                             'list, such as "people,titles". Use it to save storage space.')
-    parser.add_argument('--verbose', action='store_true',
-                        help='Show database interaction')
+    parser.add_argument(
+        "--db",
+        metavar="FILE",
+        default="imdb.db",
+        help="Connection URI for the database to import into",
+    )
+    parser.add_argument(
+        "--cache-dir",
+        metavar="DIR",
+        default="downloads",
+        help="Download cache dir where the tsv files from imdb will be stored before import",
+    )
+    parser.add_argument(
+        "--no-index",
+        action="store_true",
+        help="Do not create any indices. Massively slower joins, "
+        "but cuts the DB file size approximately in half",
+    )
+    parser.add_argument(
+        "--only",
+        metavar="TABLES",
+        help="Import only a some tables. The tables to import are specified using "
+        'a comma delimited list, such as "people,titles". Use it to save storage space.',
+    )
+    parser.add_argument("--verbose", action="store_true", help="Show database interaction")
     opts = parser.parse_args()
 
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+    logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
     if opts.verbose:
         logger.setLevel(logging.DEBUG)
 
     if os.path.exists(opts.db):
-        logger.warning('DB already exists: ({db}). Refusing to modify. Exiting'.format(db=opts.db))
+        logger.warning(f"DB already exists: ({opts.db}). Refusing to modify. Exiting")
         return 1
 
     table_map = filter_table_subset(TSV_TABLE_MAP, opts.only) if opts.only else TSV_TABLE_MAP
 
     ensure_downloaded(table_map.keys(), opts.cache_dir)
-    logger.info('Populating database: {}'.format(opts.db))
+    logger.info(f"Populating database: {opts.db}")
     db = Database(table_map=table_map, uri=opts.db)
 
     for filename, table_mapping in table_map.items():
         table, column_mapping = table_mapping
-        import_file(db, os.path.join(opts.cache_dir, filename),
-                    table, column_mapping)
+        import_file(db, os.path.join(opts.cache_dir, filename), table, column_mapping)
 
     if not opts.no_index:
-        logger.info('Creating table indices ...')
+        logger.info("Creating table indices ...")
         db.create_indices()
 
-    logger.info('Analyzing DB to generate statistic for query planner ...')
+    logger.info("Analyzing DB to generate statistic for query planner ...")
     db.analyze()
 
     db.close()
-    logger.info('Import successful')
+    logger.info("Import successful")
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
