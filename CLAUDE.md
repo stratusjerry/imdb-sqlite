@@ -72,8 +72,11 @@ time uv run python -m imdb_sqlite --in-mem --db benchmark_inmem.db --cache-dir d
 
 # For more detailed timing, use Python's time module
 python -c "import time; start=time.time(); __import__('subprocess').run(['uv', 'run', 'python', '-m', 'imdb_sqlite', '--db', 'benchmark_default.db', '--cache-dir', 'downloads']); print(f'\nTotal time: {time.time()-start:.2f} seconds')"
-
+#Total time: 667.77 seconds
 python -c "import time; start=time.time(); __import__('subprocess').run(['uv', 'run', 'python', '-m', 'imdb_sqlite', '--in-mem', '--db', 'benchmark_inmem.db', '--cache-dir', 'downloads']); print(f'\nTotal time: {time.time()-start:.2f} seconds')"
+#Total time: 738.75 seconds
+
+# TODO: Benchmark with batch insert
 ```
 
 Tips for accurate benchmarking:
