@@ -46,6 +46,9 @@ uv run python -m imdb_sqlite
 # With arguments
 uv run python -m imdb_sqlite --db mydb.db --cache-dir downloads --no-index --verbose
 
+# Fast import using in-memory database (requires more RAM)
+uv run python -m imdb_sqlite --in-mem --db mydb.db
+
 # After local installation
 uv pip install -e .
 imdb-sqlite
@@ -89,6 +92,7 @@ The application is structured as a single-module Python package with the followi
 - **Streaming Processing**: Uses generators and line-by-line processing to handle multi-GB files without loading into memory
 - **Transaction Management**: Wraps each file import in a transaction with rollback on failure
 - **Configurable Indices**: `--no-index` flag allows skipping index creation to save ~50% disk space for ETL workflows
+- **In-Memory Mode**: `--in-mem` flag builds database in RAM then saves to disk for faster imports (trades RAM for speed)
 - **Progress Tracking**: Uses tqdm for visual progress on long-running imports
 
 ## Database Schema

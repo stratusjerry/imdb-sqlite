@@ -367,6 +367,11 @@ def main():
         "but cuts the DB file size approximately in half",
     )
     parser.add_argument(
+        "--in-mem",
+        action="store_true",
+        help="Build database in memory then save to disk. Faster but requires more RAM.",
+    )
+    parser.add_argument(
         "--only",
         metavar="TABLES",
         help="Import only some tables. The tables to import are specified using "
@@ -386,8 +391,14 @@ def main():
     table_map = filter_table_subset(TSV_TABLE_MAP, opts.only) if opts.only else TSV_TABLE_MAP
 
     ensure_downloaded(table_map.keys(), opts.cache_dir)
-    logger.info(f"Populating database: {opts.db}")
-    db = Database(table_map=table_map, uri=opts.db)
+
+    # Use in-memory database if requested, otherwise use target file directly
+    db_uri = ":memory:" if opts.in_mem else opts.db
+    logger.info(
+        f"Populating database: {opts.db}"
+        + (" (in-memory, will save to disk when complete)" if opts.in_mem else "")
+    )
+    db = Database(table_map=table_map, uri=db_uri)
 
     for filename, table_mapping in table_map.items():
         table, column_mapping = table_mapping
@@ -399,6 +410,13 @@ def main():
 
     logger.info("Analyzing DB to generate statistic for query planner ...")
     db.analyze()
+
+    # If using in-memory database, save to disk now
+    if opts.in_mem:
+        logger.info(f"Saving in-memory database to disk: {opts.db}")
+        disk_conn = sqlite3.connect(opts.db)
+        db.connection.backup(disk_conn)
+        disk_conn.close()
 
     db.close()
     logger.info("Import successful")
