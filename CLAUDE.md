@@ -59,6 +59,30 @@ imdb-sqlite
 make clean
 ```
 
+### Benchmarking Performance
+
+Compare import performance between default mode and in-memory mode:
+
+```bash
+# Benchmark default mode (writes directly to disk)
+time uv run python -m imdb_sqlite --db benchmark_default.db --cache-dir downloads
+
+# Benchmark in-memory mode (builds in RAM, then writes to disk)
+time uv run python -m imdb_sqlite --in-mem --db benchmark_inmem.db --cache-dir downloads
+
+# For more detailed timing, use Python's time module
+python -c "import time; start=time.time(); __import__('subprocess').run(['uv', 'run', 'python', '-m', 'imdb_sqlite', '--db', 'benchmark_default.db', '--cache-dir', 'downloads']); print(f'\nTotal time: {time.time()-start:.2f} seconds')"
+
+python -c "import time; start=time.time(); __import__('subprocess').run(['uv', 'run', 'python', '-m', 'imdb_sqlite', '--in-mem', '--db', 'benchmark_inmem.db', '--cache-dir', 'downloads']); print(f'\nTotal time: {time.time()-start:.2f} seconds')"
+```
+
+Tips for accurate benchmarking:
+- Run benchmarks multiple times and average results
+- Ensure downloads are cached (use same `--cache-dir`) to measure import performance only
+- Clear system disk cache between runs: `sync && sudo purge` (macOS) or `sync && echo 3 | sudo tee /proc/sys/vm/drop_caches` (Linux)
+- Monitor RAM usage with `--in-mem`: requires enough memory to hold entire database before writing
+- Delete output databases between runs: `rm benchmark_*.db`
+
 ## Architecture
 
 The application is structured as a single-module Python package with the following key components:
