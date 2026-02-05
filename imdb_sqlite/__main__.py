@@ -251,8 +251,7 @@ def ensure_downloaded(files, cache_dir):
     Download the collection of +files+ into cache_dir unless they already
     exist there.
     """
-    if not os.path.exists(cache_dir):
-        os.mkdir(cache_dir)
+    os.makedirs(cache_dir, exist_ok=True)
 
     for filename in files:
         url = f"https://datasets.imdbws.com/{filename}"
