@@ -370,7 +370,7 @@ def main():
     parser.add_argument(
         "--only",
         metavar="TABLES",
-        help="Import only a some tables. The tables to import are specified using "
+        help="Import only some tables. The tables to import are specified using "
         'a comma delimited list, such as "people,titles". Use it to save storage space.',
     )
     parser.add_argument("--verbose", action="store_true", help="Show database interaction")
